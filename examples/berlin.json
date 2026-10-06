@@ -1,0 +1,12 @@
+{
+  "city": "Berlin test district",
+  "country_code": "DE",
+  "province": "Berlin",
+  "district": "Synthetic block fixture",
+  "landscape": "temperate",
+  "latitude": 52.52,
+  "seed": 20261006,
+  "size": 8192,
+  "max_buildings": 120,
+  "objective_pairs": 3
+}

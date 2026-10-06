@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mosaic-map-generator"
+version = "0.1.0"
+description = "Deterministic, mirrored real-city maps for MOSAIC on Spring/Recoil"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26,<3", "Pillow>=10,<13"]
+
+[project.optional-dependencies]
+test = ["lupa>=2.4,<3"]
+
+[project.scripts]
+mosaic-mapgen = "mosaic_mapgen.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["mosaic_mapgen*"]
+
+[tool.setuptools.package-data]
+mosaic_mapgen = ["templates/**/*.lua"]
