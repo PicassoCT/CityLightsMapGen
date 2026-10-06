@@ -46,11 +46,13 @@ def transform(files):
     ui = "luaui/widgets_mosaic/gui_cityname.lua"
     result[ui] = MARKER+'\nif VFS.FileExists("mosaic/map_config.lua", VFS.MAP) then return end\n'+files[ui]
     snipe = "luarules/gadgets/game_snipe_minigame.lua"
-    needle = 'if msg and string.find(msg, "LOCATION:") then'
-    if files[snipe].count(needle)!=1:
+    variants = ['if msg and string.find(msg, "LOCATION:") then', 'if string.sub(msg, 1, 9) == "LOCATION:" then']
+    matches = [needle for needle in variants if files[snipe].count(needle)==1]
+    if len(matches)!=1:
         raise ValueError("Unknown location-message handler")
+    needle = matches[0]
     # Generated maps never accept a client's geographic identity as authoritative.
-    result[snipe] = prefix+files[snipe].replace(needle,'if not mosaicMapContext and msg and string.find(msg, "LOCATION:") then')
+    result[snipe] = prefix+files[snipe].replace(needle,'if not mosaicMapContext and ('+needle[3:-5]+') then')
     return result
 
 def install_adapter(game_dir,apply=False):

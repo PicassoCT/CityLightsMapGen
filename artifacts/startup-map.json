@@ -1,0 +1,15 @@
+{
+  "status": "experimental; no engine or multiplayer validation",
+  "archive": "MOSAIC_CityLights_World-experimental.sdz",
+  "archive_sha512": "21d31c34cc93ba0c2a877070e111494a6e49fc1a905a870bcb44e84de478da8084d1a44aee9c7bd7823eb3a4fbfa240dfa29f28c44c4b97b145ff376925b4b97",
+  "map_name": "MOSAIC CityLights World e3af14029f19",
+  "package_identity": "e3af14029f19689f7900667196716ff0c8ca7c567a4c9c3a8f2b7029670c7cd8840e1e0ab72dcd03de65befec3629eb60a43eed5a3cfe35230db70e9b9641a5a",
+  "game": "Exact MOSAIC sources recorded inside citylights/adapter-source.json",
+  "constraints": [
+    "player-hosted",
+    "two opposing allyteams",
+    "HTTP LuaSocket fetch; unverified",
+    "internal multiplayer reload; unverified"
+  ],
+  "validation": "30 Lua/Python tests pass, including current MOSAIC adapter sources; binary terrain/package checks pass"
+}

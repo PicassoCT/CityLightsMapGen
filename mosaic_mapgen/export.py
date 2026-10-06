@@ -91,8 +91,9 @@ def export(generated, destination):
     package = output/"map"
     (package/"mosaic").mkdir(parents=True)
     write_terrain(generated,package/"maps")
-    name = f'MOSAIC {generated.config.city} mirrored {generated.metadata["generation_digest"][:8]}'
-    info = {"name":name,"shortname":"MOSAIC City","version":"0.1.0", "description":f'{generated.config.country}; {generated.config.landscape}; mirrored competitive city',
+    mode = "mirrored" if generated.metadata["balance"] == "mirror-x" else "original city"
+    name = f'MOSAIC {generated.config.city} {mode} {generated.metadata["generation_digest"][:8]}'
+    info = {"name":name,"shortname":"MOSAIC City","version":"0.2.0", "description":f'{generated.config.country}; {generated.config.landscape}; {mode} competitive city',
             "author":"MOSAIC map generator","mapfile":"maps/city.smf","modtype":3,
             "smf":{"minheight":-32,"maxheight":256},"atmosphere":{"fogcolor":[0.68,0.72,0.76],"fogstart":0.6,"fogend":1.0},
             "lighting":{"groundambientcolor":[0.5,0.5,0.5],"grounddiffusecolor":[0.8,0.8,0.8],"unitambientcolor":[0.5,0.5,0.5],"unitdiffusecolor":[0.8,0.8,0.8]},

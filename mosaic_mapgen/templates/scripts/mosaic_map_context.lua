@@ -12,7 +12,7 @@ function M.Read()
     assert(type(c.rainy) == "boolean" and type(c.day_color) == "table" and #c.day_color == 3, "Invalid landscape weather")
     assert(type(c.sun_max_altitude) == "number" and (c.equatorial_sign == -1 or c.equatorial_sign == 1), "Invalid map sun")
     assert(type(c.house_types) == "table" and type(c.sin_city) == "boolean", "Invalid architectural policy")
-    assert(c.placement == "manual" and c.balance == "mirror-x", "Invalid placement contract")
+    assert(c.placement == "manual" and (c.balance == "mirror-x" or c.balance == "opportunity-graph"), "Invalid placement contract")
     assert(c.size == Game.mapSizeX and c.size == Game.mapSizeZ, "Map context dimensions do not match terrain")
     return c
 end
