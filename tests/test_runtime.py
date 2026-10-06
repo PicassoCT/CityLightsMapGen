@@ -115,6 +115,8 @@ class RuntimeTests(unittest.TestCase):
             plan=self.table({'size':8192,'cell':64,'n':128,'classes':[0]*(128*128),'context':{'landscape':'temperate','city':'Test','country':'Test','generation_digest':'a'*128},'starts':[[800,4096],[7392,4096]],'units':[],'report':{'passed':True}})
             export=self.include(b'citylights/export.lua')
             files,folder,name,digest=export[b'files'](plan,b'{}',self.table({}))
+            info=self.r.execute(files[b'mapinfo.lua'])
+            self.assertEqual(name,info[b'name']+b' '+info[b'version'])
             smf=files[b'maps/city.smf'];h=SMF.unpack_from(smf);n=h[3]
             self.assertEqual(h[0],b'spring map file\0');self.assertEqual(n,1024)
             self.assertEqual(h[11]-h[10],(n+1)**2*2)

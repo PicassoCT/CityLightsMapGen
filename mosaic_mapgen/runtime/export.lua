@@ -67,7 +67,8 @@ function M.files(plan,snapshot,options,checkpoint)
   local hashes={};for _,path in ipairs(names) do hashes[#hashes+1]=path..'\0'..util.hash(files[path])..'\n' end
   local digest=util.hash(table.concat(hashes))
   files['mosaic/manifest.lua']='return '..util.lua({file_hash= digest,generation_digest=plan.context.generation_digest,files=hashes})..'\n'
-  return files,'maps/CityLights_'..plan.context.generation_digest:sub(1,32)..'.sdd',name,digest
+  -- ArchiveScanner appends version to its lookup name; Reload must use that name.
+  return files,'maps/CityLights_'..plan.context.generation_digest:sub(1,32)..'.sdd',name..' '..core.VERSION,digest
 end
 function M.save(files,folder)
   assert(folder:match('^maps/CityLights_%x+%.sdd$'),'Invalid generated-map directory')

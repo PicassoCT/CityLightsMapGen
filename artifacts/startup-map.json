@@ -1,9 +1,9 @@
 {
   "status": "experimental; no engine or multiplayer validation",
   "archive": "MOSAIC_CityLights_World-experimental.sdz",
-  "archive_sha512": "21d31c34cc93ba0c2a877070e111494a6e49fc1a905a870bcb44e84de478da8084d1a44aee9c7bd7823eb3a4fbfa240dfa29f28c44c4b97b145ff376925b4b97",
-  "map_name": "MOSAIC CityLights World e3af14029f19",
-  "package_identity": "e3af14029f19689f7900667196716ff0c8ca7c567a4c9c3a8f2b7029670c7cd8840e1e0ab72dcd03de65befec3629eb60a43eed5a3cfe35230db70e9b9641a5a",
+  "archive_sha512": "3eadbfa0dcac1014b1ebb848e26a8491825c6ccbc0fa38c84d2b66b610e5e073edce9101bfd0374868977121d417ca560d26c67df965d8b044209c9a6aa78156",
+  "map_name": "MOSAIC CityLights World 78ad9c0ee2a3 0.2.0",
+  "package_identity": "78ad9c0ee2a302ef1c52dea6ad494a0dadc67e2ca4e18196758c9843db816b3cc27578fd5f77e9ccfe0f59a0540ea545427d0565e83a509b5cc40d644bcfffe3",
   "game": "Exact MOSAIC sources recorded inside citylights/adapter-source.json",
   "constraints": [
     "player-hosted",

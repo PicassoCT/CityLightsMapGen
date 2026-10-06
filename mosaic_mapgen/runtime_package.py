@@ -118,5 +118,5 @@ def package_map(game_dir, destination, world_file=None):
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
         for path, body in sorted(assets.items()):
             entry = zipfile.ZipInfo(path, (1980, 1, 1, 0, 0, 0)); entry.compress_type = zipfile.ZIP_DEFLATED; entry.external_attr = 0o100644 << 16; z.writestr(entry, body)
-    return {"archive": str(archive), "unpacked": str(package), "map_name": name, "package_identity": digest,
+    return {"archive": str(archive), "unpacked": str(package), "map_name": name + " 0.2.0", "package_identity": digest,
         "engine_smoke_test": "required; not performed by packager", "coastlines_bundled": True}
