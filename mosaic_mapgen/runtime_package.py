@@ -28,7 +28,7 @@ def lua_runtime():
     def include(path, *_):
         name = path.decode().removeprefix("citylights/")
         if name not in cache:
-            cache[name] = runtime.execute((extra.get(name) or (RUNTIME / name).read_text()).encode())
+            cache[name] = runtime.execute((extra.get(name) or (RUNTIME / name).read_text(encoding="utf-8")).encode())
         return cache[name]
     runtime.globals().VFS = runtime.table_from({b"MAP": b"map", b"Include": include,
         b"CalculateHash": lambda content, kind: hashlib.sha512(content).hexdigest().encode()})
@@ -69,8 +69,8 @@ def package_map(game_dir, destination, world_file=None):
     required = ["scripts/lib_mosaic.lua", *RAIN_FILES, "luaui/widgets_mosaic/gui_cityname.lua", "luarules/gadgets/game_snipe_minigame.lua"]
     original = {p: (root / p).read_text(encoding="utf-8") for p in required}
     patched = transform(original)
-    for p in sorted(ADAPTER.rglob("*.lua")): patched[p.relative_to(ADAPTER).as_posix()] = p.read_text()
-    patched["MOSAIC-LICENSE.txt"] = (root / "LICENSE").read_text()
+    for p in sorted(ADAPTER.rglob("*.lua")): patched[p.relative_to(ADAPTER).as_posix()] = p.read_text(encoding="utf-8")
+    patched["MOSAIC-LICENSE.txt"] = (root / "LICENSE").read_text(encoding="utf-8")
     patched["SOURCE-LICENSE.txt"] = "City data: OpenStreetMap contributors, ODbL-1.0, https://www.openstreetmap.org/copyright\nGame overlays modified by CityLights; retain upstream MOSAIC licensing. Sources are included as Lua.\n"
     assets = {"citylights/adapter/" + p: text.encode() for p, text in patched.items()}
     assets["citylights/adapter_files.lua"] = ("return " + lua(sorted(patched))).encode()
@@ -78,7 +78,7 @@ def package_map(game_dir, destination, world_file=None):
     assets.update({"citylights/" + name: text.encode() for name, text in bindings().items()})
     rings = []
     if world_file:
-        for f in json.loads(Path(world_file).read_text())["features"]:
+        for f in json.loads(Path(world_file).read_text(encoding="utf-8"))["features"]:
             g = f["geometry"]; polygons = [g["coordinates"]] if g["type"] == "Polygon" else g["coordinates"]
             for polygon in polygons: rings.append([[round(x, 4), round(y, 4)] for x, y, *_ in polygon[0]])
         assets["citylights/world.lua"] = ("return " + lua(rings)).encode()
@@ -93,8 +93,8 @@ def package_map(game_dir, destination, world_file=None):
     assets["luagaia/draw.lua"] = (RUNTIME / "gaia_draw.lua").read_bytes()
     assets["luarules/gadgets.lua"] = (RUNTIME / "staging_rules.lua").read_bytes()
     assets["luaui/widgets_map/gui_citylights_startup.lua"] = (RUNTIME / "widget.lua").read_bytes()
-    game_main = (root / "luarules/main.lua").read_text()
-    widgets = (root / "luaui/mosaicwidgets.lua").read_text()
+    game_main = (root / "luarules/main.lua").read_text(encoding="utf-8")
+    widgets = (root / "luaui/mosaicwidgets.lua").read_text(encoding="utf-8")
     if "luarules/gadgets.lua" not in game_main.lower() or "VFS.ZIP_ONLY" not in game_main: raise ValueError("Game gadget bootstrap changed; review map staging compatibility")
     if "WIDGET_DIRNAME_MAP" not in widgets or "VFS.MAP" not in widgets: raise ValueError("Game does not load map widgets")
     base_sources = {**original, "luarules/main.lua": game_main, "luaui/mosaicwidgets.lua": widgets}
