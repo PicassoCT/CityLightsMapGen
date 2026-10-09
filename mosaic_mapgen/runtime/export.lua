@@ -59,6 +59,7 @@ function M.files(plan,snapshot,options,checkpoint)
     mapfile='maps/city.smf',modtype=3,smf={minheight=-32,maxheight=256},teams=teams})..'\n'
   files['mosaic/map_config.lua']='return '..util.lua(plan.context)..'\n'
   files['mosaic/placements.lua']='return '..util.lua(plan.units)..'\n'
+  files['mosaic/roads.lua']='return '..util.lua(plan.roads)..'\n'
   files['mosaic/balance.lua']='return '..util.lua(plan.report)..'\n'
   files['mosaic/snapshot.json']=snapshot
   files['mosaic/request.lua']='return '..util.lua(options)..'\n'

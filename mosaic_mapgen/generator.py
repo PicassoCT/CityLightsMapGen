@@ -23,6 +23,7 @@ class Generated:
     units: list
     starts: list
     report: dict
+    roads: dict | None = None
 
 def canonical(data):
     return json.dumps(data,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode()

@@ -93,7 +93,7 @@ def export(generated, destination):
     write_terrain(generated,package/"maps")
     mode = "mirrored" if generated.metadata["balance"] == "mirror-x" else "original city"
     name = f'MOSAIC {generated.config.city} {mode} {generated.metadata["generation_digest"][:8]}'
-    info = {"name":name,"shortname":"MOSAIC City","version":"0.2.0", "description":f'{generated.config.country}; {generated.config.landscape}; {mode} competitive city',
+    info = {"name":name,"shortname":"MOSAIC City","version":"0.3.0", "description":f'{generated.config.country}; {generated.config.landscape}; {mode} competitive city',
             "author":"MOSAIC map generator","mapfile":"maps/city.smf","modtype":3,
             "smf":{"minheight":-32,"maxheight":256},"atmosphere":{"fogcolor":[0.68,0.72,0.76],"fogstart":0.6,"fogend":1.0},
             "lighting":{"groundambientcolor":[0.5,0.5,0.5],"grounddiffusecolor":[0.8,0.8,0.8],"unitambientcolor":[0.5,0.5,0.5],"unitdiffusecolor":[0.8,0.8,0.8]},
@@ -104,6 +104,8 @@ def export(generated, destination):
     (package/"mapinfo.lua").write_text("return "+lua(info)+"\n",encoding="utf-8")
     (package/"mosaic"/"map_config.lua").write_text("return "+lua(generated.metadata)+"\n",encoding="utf-8")
     (package/"mosaic"/"placements.lua").write_text("return "+lua(generated.units)+"\n",encoding="utf-8")
+    if generated.roads is not None:
+        (package/"mosaic"/"roads.lua").write_text("return "+lua(generated.roads)+"\n",encoding="utf-8")
     (package/"SOURCE-LICENSE.json").write_text(json.dumps(generated.source["source"],indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
     preview(generated,output/"preview.png")
     (output/"balance.json").write_text(json.dumps(generated.report,indent=2)+"\n",encoding="utf-8")

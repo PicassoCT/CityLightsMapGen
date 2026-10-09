@@ -47,7 +47,9 @@ function gadget:GameFrame(frame)
         Spring.SetUnitRulesParam(id, "mosaic_generated_placement", p.id, {public=true})
         if p.kind == "building" then
             GG.BuildingTable = GG.BuildingTable or {}
-            GG.BuildingTable[id] = {x=p.x,z=p.z}
+            GG.BuildingTable[id] = {x=p.x,z=p.z,address=p.address}
+            GG.GeneratedCityAddresses=GG.GeneratedCityAddresses or {}
+            if p.address then GG.GeneratedCityAddresses[p.address.plot_key]=p.address end
         end
     end
     complete = true

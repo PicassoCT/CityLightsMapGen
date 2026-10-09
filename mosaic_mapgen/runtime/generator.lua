@@ -1,7 +1,8 @@
 local util=VFS.Include('citylights/util.lua',nil,VFS.MAP)
 local graph=VFS.Include('citylights/graph.lua',nil,VFS.MAP)
 local profiles=VFS.Include('citylights/profiles.lua',nil,VFS.MAP)
-local M={VERSION='0.2.0',CELL=64,SIZE=8192}
+local cityRoads=VFS.Include('citylights/city_roads.lua',nil,VFS.MAP)
+local M={VERSION='0.3.0',CELL=64,SIZE=8192}
 local function clamp(v,a,b) return math.max(a,math.min(b,v)) end
 local function polygonInside(x,z,ring)
   local inside=false;local j=#ring
@@ -67,6 +68,19 @@ function M.build(data,options,checkpoint)
   end
   local function index(x,z) return clamp(math.floor(z/M.CELL),0,n-1)*n+clamp(math.floor(x/M.CELL),0,n-1)+1 end
   local buildings,objectives,layers={},{},{[2]={},[3]={},[4]={},[1]={}}
+  local roadRecords={}
+  -- Clip each segment to the map rectangle. A way can enter/leave more than
+  -- once; separate pieces retain a stable source ID plus segment index.
+  local function clipped(a,b)
+    local dx,dz=b[1]-a[1],b[2]-a[2];local lo,hi=0,1
+    for _,v in ipairs({{-dx,a[1]},{dx,M.SIZE-a[1]},{-dz,a[2]},{dz,M.SIZE-a[2]}}) do
+      if v[1]==0 then if v[2]<0 then return end
+      else local t=v[2]/v[1];if v[1]<0 then lo=math.max(lo,t) else hi=math.min(hi,t) end end
+    end
+    if lo>=hi then return end
+    return {math.floor(a[1]+dx*lo+0.5),math.floor(a[2]+dz*lo+0.5)},
+      {math.floor(a[1]+dx*hi+0.5),math.floor(a[2]+dz*hi+0.5)}
+  end
   for _,f in ipairs(features) do
     local t,g=f.properties or {},f.geometry;assert(g and g.coordinates,'Malformed feature geometry')
     local points=g.type=='Polygon' and g.coordinates[1] or g.coordinates
@@ -78,9 +92,27 @@ function M.build(data,options,checkpoint)
     local name
     for _,key in ipairs({'amenity','landuse','power','military'}) do local v=key=='military' and t[key] and 'military' or t[key];name=name or profiles.objectives[v] end
     if name then objectives[#objectives+1]={x=cx,z=cz,name=name,source_id=tostring(f.id)}
-    elseif t.building and t.building~='no' then buildings[#buildings+1]={x=cx,z=cz,source_id=tostring(f.id)} end
+    elseif t.building and t.building~='no' then buildings[#buildings+1]={x=cx,z=cz,source_id=tostring(f.id),street_name=t['addr:street'],house_number=t['addr:housenumber']} end
     local cls
-    if t.highway then cls=1 elseif t.waterway or t.water or t.natural=='water' or t.natural=='wetland' or t.landuse=='reservoir' then cls=4
+    if t.highway then
+      cls=1
+      if g.type=='LineString' then
+        local piece,part=nil,0
+        for i=2,#ring do
+          local a,b=clipped(ring[i-1],ring[i])
+          if a then
+            local last=piece and piece.points[#piece.points]
+            if not last or last[1]~=a[1] or last[2]~=a[2] then
+              part=part+1;local id=tostring(f.id)..'/'..part
+              piece={id=id,name=t.name or cityRoads.name(id,context.culture,options.seed),
+                width=(t.highway=='motorway' or t.highway=='trunk') and 64 or (t.highway=='footway' or t.highway=='path') and 12 or 32,points={a}}
+              roadRecords[#roadRecords+1]=piece
+            end
+            piece.points[#piece.points+1]=b
+          else piece=nil end
+        end
+      end
+    elseif t.waterway or t.water or t.natural=='water' or t.natural=='wetland' or t.landuse=='reservoir' then cls=4
     elseif t.natural=='wood' or t.landuse=='forest' then cls=3
     elseif t.leisure=='park' or t.landuse=='grass' or t.landuse=='meadow' or t.landuse=='farmland' then cls=2 end
     if cls then layers[cls][#layers[cls]+1]={ring=ring,line=g.type=='LineString'} end
@@ -110,7 +142,8 @@ function M.build(data,options,checkpoint)
     for rz=-r,r do for rx=-r,r do local cls=classes[index(x+rx*M.CELL,z+rz*M.CELL)];if cls==4 or cls==1 then return false end end end
     local name=c.name
     if kind=='building' then local die=rng(100);for _,w in ipairs(profiles.houses[context.culture]) do if die<w[2] then name=w[1];break end;die=die-w[2] end end
-    units[#units+1]={id=kind..'-'..#units,name=name,x=x,z=z,radius=radius,kind=kind,facing=rng(4),source_id=c.source_id,value=1}
+    units[#units+1]={id=kind..'-'..#units,name=name,x=x,z=z,radius=radius,kind=kind,facing=rng(4),source_id=c.source_id,value=1,
+      street_name=c.street_name,house_number=c.house_number}
     return true
   end
   for _,c in ipairs(objectives) do if #units<(options.objective_count or 6) then place(c,256,'objective') end end
@@ -128,6 +161,10 @@ function M.build(data,options,checkpoint)
     if place({x=320+rng(M.SIZE-640),z=320+rng(M.SIZE-640),source_id='procedural/infill'},160,'building') then houses=houses+1 end
   end
   assert(houses>=(options.min_buildings or 12),'Insufficient usable land for city housing')
+  local roadNetwork=cityRoads.normalize({schema=1,generation='map',roads=roadRecords})
+  local plots={};for _,u in ipairs(units) do if u.kind=='building' then plots[#plots+1]=u end end
+  local addresses=cityRoads.assign(roadNetwork,plots)
+  for _,u in ipairs(plots) do u.address=addresses[cityRoads.key(u.x,u.z)];u.street_name=nil;u.house_number=nil end
   local grid={};for i,c in ipairs(classes) do if c~=4 then grid[i]=c==1 and 10 or 18 end end
   for _,u in ipairs(units) do local r=math.ceil((u.radius+32)/M.CELL)
     for z=math.floor(u.z/M.CELL)-r,math.floor(u.z/M.CELL)+r do for x=math.floor(u.x/M.CELL)-r,math.floor(u.x/M.CELL)+r do if z>=0 and z<n and x>=0 and x<n then grid[z*n+x+1]=nil end end end
@@ -139,7 +176,7 @@ function M.build(data,options,checkpoint)
   if data.source then context.source_attribution=data.source.attribution;context.source_license=data.source.license end
   context.generation_digest=util.hash(M.VERSION..'\n'..packageIdentity..'\n'..util.lua(options)..'\n'..util.lua(features)..'\n'..util.lua(context))
   context.source_digest=util.hash(util.lua(features));context.cityname=context.city
-  return {classes=classes,units=units,starts=report.starts,context=context,report=report,n=n,size=M.SIZE,cell=M.CELL,grid=grid}
+  return {classes=classes,units=units,roads=roadNetwork,starts=report.starts,context=context,report=report,n=n,size=M.SIZE,cell=M.CELL,grid=grid}
 end
 function M.height(plan,x,z)
   local i=clamp(math.floor(z/plan.cell),0,plan.n-1)*plan.n+clamp(math.floor(x/plan.cell),0,plan.n-1)+1

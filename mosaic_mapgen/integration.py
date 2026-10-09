@@ -20,6 +20,7 @@ LIB_HOOKS = {
     "mapOverideSinCity": "return mosaicMapContext.sin_city",
 }
 RAIN_FILES = ["luarules/gadgets/gfx_neonHolograms.lua", "luaui/widgets_mosaic/gfx_rain.lua", "luaui/widgets_mosaic/gfx_heathaze.lua"]
+ADDRESS_FILES = ["scripts/lib_staticstring.lua", "luarules/gadgets/game_spawnCity.lua"]
 
 def function_hook(text,name,statement,local=False):
     pattern = rf"\b{'local ' if local else ''}function\s+{name}\s*\([^)]*\)"
@@ -41,6 +42,14 @@ def transform(files):
         raise ValueError("Unknown lib_mosaic rain-area initialization")
     library = library.replace(needle,"if mosaicMapContext then GG.boolRainyArea = mosaicMapContext.rainy end\n                "+needle)
     result = {"scripts/lib_mosaic.lua":prefix+library}
+    # Ship the same address integration as the matching game. Refuse an older
+    # counter-based game instead of silently allowing it to overwrite addresses.
+    if 'GG.CityAddressService.Register' not in files[ADDRESS_FILES[0]]:
+        raise ValueError("MOSAIC requires the City roads and addresses game update before packaging")
+    if 'setHouseStreetNameTooltip(id, x, z,' not in files[ADDRESS_FILES[1]]:
+        raise ValueError("MOSAIC city respawn address hook missing")
+    for path in ADDRESS_FILES:
+        result[path] = MARKER+'\n'+files[path]
     for path in RAIN_FILES:
         result[path] = prefix+function_hook(files[path],"isRainyArea","return mosaicMapContext.rainy",local=True)
     ui = "luaui/widgets_mosaic/gui_cityname.lua"
@@ -57,7 +66,7 @@ def transform(files):
 
 def install_adapter(game_dir,apply=False):
     root = Path(game_dir).resolve()
-    paths = ["scripts/lib_mosaic.lua",*RAIN_FILES,"luaui/widgets_mosaic/gui_cityname.lua","luarules/gadgets/game_snipe_minigame.lua"]
+    paths = ["scripts/lib_mosaic.lua",*RAIN_FILES,*ADDRESS_FILES,"luaui/widgets_mosaic/gui_cityname.lua","luarules/gadgets/game_snipe_minigame.lua"]
     original = {p:(root/p).read_bytes() for p in paths}
     text = {p:b.decode("utf-8").replace("\r\n","\n") for p,b in original.items()}
     patched = transform(text)
@@ -65,7 +74,9 @@ def install_adapter(game_dir,apply=False):
     for source in sorted(templates.rglob("*.lua")):
         path = source.relative_to(templates).as_posix()
         if (root/path).exists():
-            raise ValueError(f"Refusing to replace existing adapter file: {path}")
+            if (root/path).read_bytes() != source.read_bytes():
+                raise ValueError(f"Refusing to replace existing adapter file: {path}")
+            continue  # Already supplied by the matching game; never overwrite.
         patched[path] = source.read_text(encoding="utf-8")
     digest = hashlib.sha256(b"".join(original[p] for p in paths)).hexdigest()
     result = {"applied":False,"base_digest":digest,"files":list(patched),"compatibility":"All required anchors checked; run Lua tests and inspect in Recoil after applying"}

@@ -17,6 +17,8 @@ def compatible_files():
     library="\n".join(f'function {name}() return "legacy" end' for name in LIB_HOOKS)
     library+='\nfunction isRaining() if GG.boolRainyArea == nil then GG.boolRainyArea=false end end\n'
     return {"scripts/lib_mosaic.lua":library,**{p:'local function isRainyArea() return true end\n' for p in RAIN_FILES},
+        "scripts/lib_staticstring.lua":'function setHouseStreetNameTooltip(id) return GG.CityAddressService.Register(id) end\n',
+        "luarules/gadgets/game_spawnCity.lua":'function respawn(id,x,z) setHouseStreetNameTooltip(id, x, z, Game) end\n',
         "luaui/widgets_mosaic/gui_cityname.lua":'function widget:GetInfo() return {name="legacy location"} end\n',
         "luarules/gadgets/game_snipe_minigame.lua":'function gadget:RecvLuaMsg(msg) if msg and string.find(msg, "LOCATION:") then GG.Location="client" end end\n'}
 

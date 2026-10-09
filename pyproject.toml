@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mosaic-map-generator"
-version = "0.2.0"
+version = "0.3.0"
 description = "Deterministic original-city maps and experimental map-contained startup for MOSAIC"
 requires-python = ">=3.11"
 dependencies = ["numpy>=1.26,<3", "Pillow>=10,<13"]

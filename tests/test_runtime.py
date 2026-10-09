@@ -112,7 +112,7 @@ class RuntimeTests(unittest.TestCase):
             self.r.globals().VFS[b'LoadFile']=lambda path,*_: template if path==b'citylights/template.smf' else b'-- adapter'
             previous=self.r.globals().VFS[b'Include']
             self.r.globals().VFS[b'Include']=lambda path,*_: self.table([]) if path==b'citylights/adapter_files.lua' else previous(path)
-            plan=self.table({'size':8192,'cell':64,'n':128,'classes':[0]*(128*128),'context':{'landscape':'temperate','city':'Test','country':'Test','generation_digest':'a'*128},'starts':[[800,4096],[7392,4096]],'units':[],'report':{'passed':True}})
+            plan=self.table({'size':8192,'cell':64,'n':128,'classes':[0]*(128*128),'context':{'landscape':'temperate','city':'Test','country':'Test','generation_digest':'a'*128},'starts':[[800,4096],[7392,4096]],'units':[],'roads':{'schema':1,'generation':'map','roads':[]},'report':{'passed':True}})
             export=self.include(b'citylights/export.lua')
             files,folder,name,digest=export[b'files'](plan,b'{}',self.table({}))
             info=self.r.execute(files[b'mapinfo.lua'])

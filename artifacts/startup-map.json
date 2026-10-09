@@ -1,15 +1,21 @@
 {
   "status": "experimental; no engine or multiplayer validation",
   "archive": "MOSAIC_CityLights_World-experimental.sdz",
-  "archive_sha512": "3eadbfa0dcac1014b1ebb848e26a8491825c6ccbc0fa38c84d2b66b610e5e073edce9101bfd0374868977121d417ca560d26c67df965d8b044209c9a6aa78156",
-  "map_name": "MOSAIC CityLights World 78ad9c0ee2a3 0.2.0",
-  "package_identity": "78ad9c0ee2a302ef1c52dea6ad494a0dadc67e2ca4e18196758c9843db816b3cc27578fd5f77e9ccfe0f59a0540ea545427d0565e83a509b5cc40d644bcfffe3",
-  "game": "Exact MOSAIC sources recorded inside citylights/adapter-source.json",
+  "archive_sha512": "be402d2faa680dec59d6e174c36bd29b8dcc48a795661350664208f21e6bf7172a32de2cc6622373b0ada938f372acb490de50dabf8f40bf568b22a88cd2bf69",
+  "map_name": "MOSAIC CityLights World f66d8307b1c3 0.3.0",
+  "package_identity": "f66d8307b1c3512b85ab5b4726023b9c6f9e9218ccfd989ff1c98813c7e12851e7cbbaa3cfdf50475ee7f24a9e1add123147fb438f4080f8517dde4b239dbe4b",
+  "game": "MOSAIC feat/city-roads-addresses (or its merged equivalent); exact sources recorded inside citylights/adapter-source.json",
   "constraints": [
     "player-hosted",
     "two opposing allyteams",
     "HTTP LuaSocket fetch; unverified",
     "internal multiplayer reload; unverified"
   ],
-  "validation": "30 Lua/Python tests pass, including current MOSAIC adapter sources; binary terrain/package checks pass"
+  "validation": "33 Lua/Python tests pass against matching MOSAIC sources; game city-road and arcology lifecycle Lua suites pass; archive/member and binary terrain checks pass",
+  "features": [
+    "shared deterministic game/map road-address schema",
+    "OSM names and house numbers retained",
+    "plot addresses retained on rebuild",
+    "50% road opacity and decluttered names"
+  ]
 }

@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import numpy as np
 from .profiles import Config, COUNTRIES, LANDSCAPES, HOUSE_WEIGHTS, OBJECTIVES
 from .export import lua, write_terrain
-from .integration import transform, RAIN_FILES
+from .integration import transform, RAIN_FILES, ADDRESS_FILES
 
 RUNTIME = Path(__file__).parent / "runtime"
 ADAPTER = Path(__file__).parent / "templates"
@@ -61,12 +61,12 @@ def build_original(config, source):
     surface = classes.repeat(8, axis=0).repeat(8, axis=1)
     height = np.pad(np.where(surface == 4, -12, 32).astype(np.float32), ((0, 1), (0, 1)), mode="edge")
     return Generated(config, source, python_value(plan[b"context"]), height, surface,
-        python_value(plan[b"units"]), python_value(plan[b"starts"]), python_value(plan[b"report"]))
+        python_value(plan[b"units"]), python_value(plan[b"starts"]), python_value(plan[b"report"]), python_value(plan[b"roads"]))
 
 def package_map(game_dir, destination, world_file=None):
     root, out = Path(game_dir), Path(destination)
     if out.exists() and any(out.iterdir()): raise ValueError("Output directory must be empty")
-    required = ["scripts/lib_mosaic.lua", *RAIN_FILES, "luaui/widgets_mosaic/gui_cityname.lua", "luarules/gadgets/game_snipe_minigame.lua"]
+    required = ["scripts/lib_mosaic.lua", *RAIN_FILES, *ADDRESS_FILES, "luaui/widgets_mosaic/gui_cityname.lua", "luarules/gadgets/game_snipe_minigame.lua"]
     original = {p: (root / p).read_text(encoding="utf-8") for p in required}
     patched = transform(original)
     for p in sorted(ADAPTER.rglob("*.lua")): patched[p.relative_to(ADAPTER).as_posix()] = p.read_text(encoding="utf-8")
@@ -103,7 +103,7 @@ def package_map(game_dir, destination, world_file=None):
     digest = hashlib.sha512(b"".join(p.encode() + b"\0" + hashlib.sha512(b).digest() for p, b in sorted(assets.items()))).hexdigest()
     assets["citylights/package_identity.lua"] = ("return " + lua(digest)).encode()
     name = "MOSAIC CityLights World " + digest[:12]
-    assets["mapinfo.lua"] = ("return " + lua({"name": name, "version": "0.2.0", "shortname": "CityLights World", "description": "Experimental world-city startup; player-hosted MOSAIC and LuaSocket required", "author": "MOSAIC contributors", "modtype": 3, "mapfile": "maps/startup.smf", "smf": {"minheight": -32, "maxheight": 256}, "teams": {0: {"startpos": {"x": 800, "z": 4096}}, 1: {"startpos": {"x": 7392, "z": 4096}}}})).encode()
+    assets["mapinfo.lua"] = ("return " + lua({"name": name, "version": "0.3.0", "shortname": "CityLights World", "description": "Experimental world-city startup; player-hosted MOSAIC and LuaSocket required", "author": "MOSAIC contributors", "modtype": 3, "mapfile": "maps/startup.smf", "smf": {"minheight": -32, "maxheight": 256}, "teams": {0: {"startpos": {"x": 800, "z": 4096}}, 1: {"startpos": {"x": 7392, "z": 4096}}}})).encode()
     options = [{"key": "citylights_seed", "name": "Generation seed", "type": "number", "def": 1, "min": 0, "max": 2147483646, "step": 1},
         {"key": "citylights_latitude", "name": "Initial latitude", "type": "number", "def": 52.52, "min": -90, "max": 90, "step": 0.0001},
         {"key": "citylights_longitude", "name": "Initial longitude", "type": "number", "def": 13.405, "min": -180, "max": 180, "step": 0.0001},
@@ -118,5 +118,5 @@ def package_map(game_dir, destination, world_file=None):
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
         for path, body in sorted(assets.items()):
             entry = zipfile.ZipInfo(path, (1980, 1, 1, 0, 0, 0)); entry.compress_type = zipfile.ZIP_DEFLATED; entry.external_attr = 0o100644 << 16; z.writestr(entry, body)
-    return {"archive": str(archive), "unpacked": str(package), "map_name": name + " 0.2.0", "package_identity": digest,
+    return {"archive": str(archive), "unpacked": str(package), "map_name": name + " 0.3.0", "package_identity": digest,
         "engine_smoke_test": "required; not performed by packager", "coastlines_bundled": True}
