@@ -21,7 +21,7 @@ jobs:
       - run: python -m mosaic_mapgen build --city examples/berlin-fixture.geojson --config examples/berlin.json --out build/demo
       - uses: actions/upload-artifact@v4
         with:
-          name: mirrored-demo-${{ matrix.os }}-${{ matrix.python }}
+          name: original-city-demo-${{ matrix.os }}-${{ matrix.python }}
           path: |
             build/demo/MOSAIC_city.sdz
             build/demo/preview.png

@@ -1,0 +1,23 @@
+{
+  "status": "experimental; no engine or multiplayer validation",
+  "archive": "MOSAIC_CityLights_World-experimental.sdz",
+  "archive_sha512": "37ad487f14f964b1138d36fd611bcd0ee2b6aa6b8630545619a9859b03d25770eaefa1b7008898fc41250d1bf3e0bde23810e1a12abd38db5d72e70b9778bc57",
+  "map_name": "MOSAIC CityLights World 3a5d83a30028 0.3.0",
+  "package_identity": "3a5d83a300280cc2c169327318b600c888238420b48662040bccf1d543d4d9008e6a9015e252a0fa55173e019171eda4303e90361079ead20b314a47bfe735c2",
+  "game": "MOSAIC feat/city-roads-addresses @8d992b5f6bba0f99882bca7cb2eb7380769e8113 (or matching merged sources)",
+  "constraints": [
+    "player-hosted",
+    "two opposing allyteams",
+    "HTTP LuaSocket fetch; unverified",
+    "internal multiplayer reload; unverified"
+  ],
+  "validation": "33 generator tests and 3 game Lua lifecycle/organic-street suites pass; Dhubai atlas visually checked against real minimap; Recoil rendering and multiplayer reload unverified",
+  "features": [
+    "shared deterministic game/map road-address schema",
+    "OSM names and house numbers retained",
+    "plot addresses retained on rebuild",
+    "plot-aware curved roads and authored Dhubai asphalt centrelines",
+    "faint blue quarter-opacity roads fade close up; pure names remain",
+    "shared readable sectors, tooltip references and radio callouts"
+  ]
+}

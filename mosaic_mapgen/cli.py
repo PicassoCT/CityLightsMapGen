@@ -8,7 +8,7 @@ from .generator import generate
 from .export import export
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Generate deterministic mirrored Spring/Recoil city maps for MOSAIC")
+    parser = argparse.ArgumentParser(description="Generate deterministic original-city Spring/Recoil maps for MOSAIC")
     commands = parser.add_subparsers(dest="command",required=True)
     fetch = commands.add_parser("fetch",help="Select a Google Maps viewport and save an OSM snapshot")
     fetch.add_argument("--google-view",required=True)
@@ -18,6 +18,11 @@ def main(argv=None):
     build.add_argument("--city",type=Path,required=True)
     build.add_argument("--config",type=Path,required=True)
     build.add_argument("--out",type=Path,required=True)
+    build.add_argument("--legacy-mirror",action="store_true",help="Use the superseded mirrored layout")
+    package = commands.add_parser("package-startup-map",help="Package a map-contained Lua generator for unchanged Skylobby")
+    package.add_argument("--game-dir",type=Path,required=True)
+    package.add_argument("--out",type=Path,required=True)
+    package.add_argument("--world-geojson",type=Path,help="Optional licensed world outlines")
     install = commands.add_parser("install-game-adapter",help="Preview or apply checked MOSAIC integration patches")
     install.add_argument("--game-dir",type=Path,required=True)
     install.add_argument("--apply",action="store_true",help="Write adapter and patches after complete compatibility validation")
@@ -30,12 +35,19 @@ def main(argv=None):
             print(f"Saved OSM snapshot: {args.out}")
         elif args.command=="build":
             config,city = Config.load(args.config),load_city(args.city)
-            generated = generate(config,city)
+            if args.legacy_mirror:
+                generated = generate(config,city)
+            else:
+                from .runtime_package import build_original
+                generated = build_original(config,city)
             if not generated.report["passed"]:
                 print(json.dumps(generated.report,indent=2),file=sys.stderr)
                 return 2
             archive = export(generated,args.out)
             print(json.dumps({"map":str(archive),"buildings":generated.report["building_count"],"objectives":generated.report["objective_count"],"balanced":True},indent=2))
+        elif args.command=="package-startup-map":
+            from .runtime_package import package_map
+            print(json.dumps(package_map(args.game_dir,args.out,args.world_geojson),indent=2))
         else:
             from .integration import install_adapter
             print(json.dumps(install_adapter(args.game_dir,args.apply),indent=2))

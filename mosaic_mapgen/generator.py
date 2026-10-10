@@ -23,6 +23,7 @@ class Generated:
     units: list
     starts: list
     report: dict
+    roads: dict | None = None
 
 def canonical(data):
     return json.dumps(data,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode()
@@ -187,19 +188,21 @@ def preview(generated, path):
     image = Image.fromarray(rgb_surface(generated.surface,generated.config.landscape)).resize((1024,1024),Image.Resampling.NEAREST)
     draw = ImageDraw.Draw(image)
     scale = 1024/size
-    for u in generated.units:
+    for i,u in enumerate(generated.units):
         x,z,r = u["x"]*scale,u["z"]*scale,u["radius"]*scale
         color = "#f1b943" if u["kind"]=="objective" else "#d7d1c5"
         draw.rectangle((x-r,z-r,x+r,z+r),fill=color,outline="#232930",width=1)
         if u["kind"]=="objective":
-            draw.text((x-r,z),str(u["pair"]+1),fill="black")
+            draw.text((x-r,z),str(u.get("pair",i)+1),fill="black")
     for i,(x,z) in enumerate(generated.starts):
         x,z = x*scale,z*scale
         draw.ellipse((x-10,z-10,x+10,z+10),fill="#58cbf5" if i==0 else "#ef645e",outline="white",width=2)
-    draw.line((512,0,512,1024),fill="#edf2f2",width=1)
+    if generated.metadata["balance"] == "mirror-x":
+        draw.line((512,0,512,1024),fill="#edf2f2",width=1)
     draw.rectangle((0,0,1024,46),fill="#14202a")
-    draw.text((12,8),f'{generated.config.city} | {generated.config.country} | {generated.config.landscape} | mirrored city',fill="white")
-    draw.text((12,26),f'{generated.report["building_count"]} buildings | {generated.report["objective_count"]} objectives | three cross-city corridors',fill="#f1b943")
+    mode = "mirrored city" if generated.metadata["balance"] == "mirror-x" else "original city; graph-balanced deployment"
+    draw.text((12,8),f'{generated.config.city} | {generated.config.country} | {generated.config.landscape} | {mode}',fill="white")
+    draw.text((12,26),f'{generated.report["building_count"]} buildings | {generated.report["objective_count"]} objectives',fill="#f1b943")
     draw.rectangle((0,1002,1024,1024),fill="#14202a")
     draw.text((12,1008),generated.source["source"]["attribution"]+" | "+generated.source["source"]["license"],fill="white")
     image.save(path)
