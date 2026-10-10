@@ -1,21 +1,23 @@
 {
   "status": "experimental; no engine or multiplayer validation",
   "archive": "MOSAIC_CityLights_World-experimental.sdz",
-  "archive_sha512": "be402d2faa680dec59d6e174c36bd29b8dcc48a795661350664208f21e6bf7172a32de2cc6622373b0ada938f372acb490de50dabf8f40bf568b22a88cd2bf69",
-  "map_name": "MOSAIC CityLights World f66d8307b1c3 0.3.0",
-  "package_identity": "f66d8307b1c3512b85ab5b4726023b9c6f9e9218ccfd989ff1c98813c7e12851e7cbbaa3cfdf50475ee7f24a9e1add123147fb438f4080f8517dde4b239dbe4b",
-  "game": "MOSAIC feat/city-roads-addresses (or its merged equivalent); exact sources recorded inside citylights/adapter-source.json",
+  "archive_sha512": "37ad487f14f964b1138d36fd611bcd0ee2b6aa6b8630545619a9859b03d25770eaefa1b7008898fc41250d1bf3e0bde23810e1a12abd38db5d72e70b9778bc57",
+  "map_name": "MOSAIC CityLights World 3a5d83a30028 0.3.0",
+  "package_identity": "3a5d83a300280cc2c169327318b600c888238420b48662040bccf1d543d4d9008e6a9015e252a0fa55173e019171eda4303e90361079ead20b314a47bfe735c2",
+  "game": "MOSAIC feat/city-roads-addresses @8d992b5f6bba0f99882bca7cb2eb7380769e8113 (or matching merged sources)",
   "constraints": [
     "player-hosted",
     "two opposing allyteams",
     "HTTP LuaSocket fetch; unverified",
     "internal multiplayer reload; unverified"
   ],
-  "validation": "33 Lua/Python tests pass against matching MOSAIC sources; game city-road and arcology lifecycle Lua suites pass; archive/member and binary terrain checks pass",
+  "validation": "33 generator tests and 3 game Lua lifecycle/organic-street suites pass; Dhubai atlas visually checked against real minimap; Recoil rendering and multiplayer reload unverified",
   "features": [
     "shared deterministic game/map road-address schema",
     "OSM names and house numbers retained",
     "plot addresses retained on rebuild",
-    "50% road opacity and decluttered names"
+    "plot-aware curved roads and authored Dhubai asphalt centrelines",
+    "faint blue quarter-opacity roads fade close up; pure names remain",
+    "shared readable sectors, tooltip references and radio callouts"
   ]
 }
